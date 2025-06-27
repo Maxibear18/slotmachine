@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import './App.css';
 
 
-const symbols = ['🍋', '🍒', '🔔', '💎', '7️⃣'];
+const symbols = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
 const symbolValues = {
-  '🍋': 10,
   '🍒': 20,
+  '🍋': 10,
   '🔔': 30,
   '💎': 100,
   '7️⃣': 200,
@@ -26,6 +26,7 @@ function App() {
   const [chips, setChips] = useState(100);
   const [message, setMessage] = useState('');
   const [lastChange, setLastChange] = useState(0);
+  const [matchedSlots, setMatchedSlots] = useState([]); // <-- NEW
 
   const spin = () => {
     if (chips < 10) {
@@ -35,9 +36,9 @@ function App() {
 
     const newGrid = generateSlotGrid();
     setGrid(newGrid);
-
-    let winnings = 0;
+    const matches = [];
     const winningLines = [];
+    let winnings = 0;
 
     for (let i = 0; i < 3; i++) {
       if (
@@ -46,6 +47,7 @@ function App() {
       ) {
         winnings += symbolValues[newGrid[i][0]];
         winningLines.push(`Row ${i + 1} (${newGrid[i][0]})`);
+        matches.push([i, 0], [i, 1], [i, 2]);
       }
     }
 
@@ -56,6 +58,7 @@ function App() {
       ) {
         winnings += symbolValues[newGrid[0][j]];
         winningLines.push(`Column ${j + 1} (${newGrid[0][j]})`);
+        matches.push([0, j], [1, j], [2, j]);
       }
     }
 
@@ -65,6 +68,7 @@ function App() {
     ) {
       winnings += symbolValues[newGrid[0][0]];
       winningLines.push(`Diagonal ↘ (${newGrid[0][0]})`);
+      matches.push([0, 0], [1, 1], [2, 2]);
     }
 
     if (
@@ -73,11 +77,13 @@ function App() {
     ) {
       winnings += symbolValues[newGrid[0][2]];
       winningLines.push(`Diagonal ↙ (${newGrid[0][2]})`);
+      matches.push([0, 2], [1, 1], [2, 0]);
     }
 
     const chipChange = winnings - 10;
     setChips(prev => prev + chipChange);
     setLastChange(chipChange);
+    setMatchedSlots(matches); 
 
     if (winningLines.length > 0) {
       setMessage(`🎉 You won ${winnings} chips!\nWinning Lines:\n- ${winningLines.join('\n- ')}`);
@@ -88,7 +94,7 @@ function App() {
 
   return (
     <div className="App">
-      {/* Legend (top-right corner) */}
+      {/* Legend */}
       <div className="legend">
         <h3>🎯 Symbol Values</h3>
         <ul>
@@ -109,9 +115,19 @@ function App() {
       <div className="slot-grid">
         {grid.map((row, rowIndex) => (
           <div key={rowIndex} className="slot-row">
-            {row.map((symbol, colIndex) => (
-              <span key={colIndex} className="slot">{symbol}</span>
-            ))}
+            {row.map((symbol, colIndex) => {
+              const isMatch = matchedSlots.some(
+                ([r, c]) => r === rowIndex && c === colIndex
+              );
+              return (
+                <span
+                  key={colIndex}
+                  className={`slot ${isMatch ? 'match' : ''}`}
+                >
+                  {symbol}
+                </span>
+              );
+            })}
           </div>
         ))}
       </div>
