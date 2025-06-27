@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import './App.css';
 
 
-const symbols = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
+const symbols = ['🍋', '🍒', '🔔', '💎', '7️⃣'];
 const symbolValues = {
-  '🍒': 20,
   '🍋': 10,
+  '🍒': 20,
   '🔔': 30,
   '💎': 100,
   '7️⃣': 200,
@@ -88,12 +88,24 @@ function App() {
 
   return (
     <div className="App">
+      {/* Legend (top-right corner) */}
+      <div className="legend">
+        <h3>🎯 Symbol Values</h3>
+        <ul>
+          {symbols.map((sym) => (
+            <li key={sym}>
+              <span className="legend-symbol">{sym}</span> = {symbolValues[sym]} chips
+            </li>
+          ))}
+        </ul>
+      </div>
+
       <h1>🎰 Slot Machine</h1>
+
       <div className="chip-count">
         💰 Chips: <strong>{chips}</strong>
       </div>
 
-      {/* Slot grid */}
       <div className="slot-grid">
         {grid.map((row, rowIndex) => (
           <div key={rowIndex} className="slot-row">
