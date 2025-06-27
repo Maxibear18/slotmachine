@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
 
-
 const symbols = ['🍋', '🍒', '🔔', '💎', '7️⃣'];
 const symbolValues = {
   '🍋': 10,
@@ -38,16 +37,16 @@ function App() {
     setLastChange(0);
 
     const finalGrid = generateSlotGrid();
-    const frames = 20; 
+    const frames = 20;
     let frame = 0;
 
     const interval = setInterval(() => {
       const animatedGrid = grid.map((row, rowIndex) =>
         row.map((_, colIndex) => {
           if (frame < (frames + colIndex * 10)) {
-            return getRandomSymbol(); 
+            return getRandomSymbol();
           } else {
-            return finalGrid[rowIndex][colIndex]; 
+            return finalGrid[rowIndex][colIndex];
           }
         })
       );
@@ -62,7 +61,7 @@ function App() {
         evaluateSpin(finalGrid);
       }
     }, 75);
-    
+
     setChips(prev => prev - 10);
   };
 
@@ -112,7 +111,6 @@ function App() {
 
   return (
     <div className="App">
-      {/* Legend */}
       <div className="legend">
         <h3>🎯 Symbol Values</h3>
         <ul>
@@ -130,24 +128,38 @@ function App() {
         💰 Chips: <strong>{chips}</strong>
       </div>
 
-      <div className="slot-grid">
-        {grid.map((row, rowIndex) => (
-          <div key={rowIndex} className="slot-row">
-            {row.map((symbol, colIndex) => {
-              const isMatch = matchedSlots.some(
-                ([r, c]) => r === rowIndex && c === colIndex
-              );
-              return (
-                <span
-                  key={colIndex}
-                  className={`slot ${isMatch ? 'match' : ''}`}
-                >
-                  {symbol}
-                </span>
-              );
-            })}
-          </div>
-        ))}
+      <div className="machine-container">
+        <div className="light-strip left">
+          {[...Array(9)].map((_, i) => (
+            <div key={i} className={`bulb bulb-${i % 2}`} />
+          ))}
+        </div>
+
+        <div className="slot-grid">
+          {grid.map((row, rowIndex) => (
+            <div key={rowIndex} className="slot-row">
+              {row.map((symbol, colIndex) => {
+                const isMatch = matchedSlots.some(
+                  ([r, c]) => r === rowIndex && c === colIndex
+                );
+                return (
+                  <span
+                    key={colIndex}
+                    className={`slot ${isMatch ? 'match' : ''}`}
+                  >
+                    {symbol}
+                  </span>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+
+        <div className="light-strip right">
+          {[...Array(9)].map((_, i) => (
+            <div key={i} className={`bulb bulb-${i % 2}`} />
+          ))}
+        </div>
       </div>
 
       <button onClick={spin} disabled={isSpinning}>
