@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import './App.css';
 
 
-const symbols = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
+const symbols = ['🍋', '🍒', '🔔', '💎', '7️⃣'];
 const symbolValues = {
-  '🍒': 20,
   '🍋': 10,
+  '🍒': 20,
   '🔔': 30,
   '💎': 100,
   '7️⃣': 200,
@@ -26,25 +26,53 @@ function App() {
   const [chips, setChips] = useState(100);
   const [message, setMessage] = useState('');
   const [lastChange, setLastChange] = useState(0);
-  const [matchedSlots, setMatchedSlots] = useState([]); // <-- NEW
+  const [matchedSlots, setMatchedSlots] = useState([]);
+  const [isSpinning, setIsSpinning] = useState(false);
 
   const spin = () => {
-    if (chips < 10) {
-      setMessage("❌ Not enough chips to spin. You need at least 10.");
-      return;
-    }
+    if (chips < 10 || isSpinning) return;
 
-    const newGrid = generateSlotGrid();
-    setGrid(newGrid);
+    setIsSpinning(true);
+    setMatchedSlots([]);
+    setMessage('');
+    setLastChange(0);
+
+    const finalGrid = generateSlotGrid();
+    const frames = 20; 
+    let frame = 0;
+
+    const interval = setInterval(() => {
+      const animatedGrid = grid.map((row, rowIndex) =>
+        row.map((_, colIndex) => {
+          if (frame < (frames + colIndex * 10)) {
+            return getRandomSymbol(); 
+          } else {
+            return finalGrid[rowIndex][colIndex]; 
+          }
+        })
+      );
+
+      setGrid(animatedGrid);
+      frame++;
+
+      if (frame > frames + 20) {
+        clearInterval(interval);
+        setGrid(finalGrid);
+        setIsSpinning(false);
+        evaluateSpin(finalGrid);
+      }
+    }, 75);
+    
+    setChips(prev => prev - 10);
+  };
+
+  const evaluateSpin = (newGrid) => {
     const matches = [];
     const winningLines = [];
     let winnings = 0;
 
     for (let i = 0; i < 3; i++) {
-      if (
-        newGrid[i][0] === newGrid[i][1] &&
-        newGrid[i][1] === newGrid[i][2]
-      ) {
+      if (newGrid[i][0] === newGrid[i][1] && newGrid[i][1] === newGrid[i][2]) {
         winnings += symbolValues[newGrid[i][0]];
         winningLines.push(`Row ${i + 1} (${newGrid[i][0]})`);
         matches.push([i, 0], [i, 1], [i, 2]);
@@ -52,38 +80,28 @@ function App() {
     }
 
     for (let j = 0; j < 3; j++) {
-      if (
-        newGrid[0][j] === newGrid[1][j] &&
-        newGrid[1][j] === newGrid[2][j]
-      ) {
+      if (newGrid[0][j] === newGrid[1][j] && newGrid[1][j] === newGrid[2][j]) {
         winnings += symbolValues[newGrid[0][j]];
         winningLines.push(`Column ${j + 1} (${newGrid[0][j]})`);
         matches.push([0, j], [1, j], [2, j]);
       }
     }
 
-    if (
-      newGrid[0][0] === newGrid[1][1] &&
-      newGrid[1][1] === newGrid[2][2]
-    ) {
+    if (newGrid[0][0] === newGrid[1][1] && newGrid[1][1] === newGrid[2][2]) {
       winnings += symbolValues[newGrid[0][0]];
       winningLines.push(`Diagonal ↘ (${newGrid[0][0]})`);
       matches.push([0, 0], [1, 1], [2, 2]);
     }
 
-    if (
-      newGrid[0][2] === newGrid[1][1] &&
-      newGrid[1][1] === newGrid[2][0]
-    ) {
+    if (newGrid[0][2] === newGrid[1][1] && newGrid[1][1] === newGrid[2][0]) {
       winnings += symbolValues[newGrid[0][2]];
       winningLines.push(`Diagonal ↙ (${newGrid[0][2]})`);
       matches.push([0, 2], [1, 1], [2, 0]);
     }
 
-    const chipChange = winnings - 10;
-    setChips(prev => prev + chipChange);
-    setLastChange(chipChange);
-    setMatchedSlots(matches); 
+    setChips(prev => prev + winnings);
+    setLastChange(winnings);
+    setMatchedSlots(matches);
 
     if (winningLines.length > 0) {
       setMessage(`🎉 You won ${winnings} chips!\nWinning Lines:\n- ${winningLines.join('\n- ')}`);
@@ -132,7 +150,9 @@ function App() {
         ))}
       </div>
 
-      <button onClick={spin}>Spin (Cost: 10 chips)</button>
+      <button onClick={spin} disabled={isSpinning}>
+        {isSpinning ? 'Spinning...' : 'Spin (Cost: 10 chips)'}
+      </button>
 
       <div className="message">
         <pre>{message}</pre>
