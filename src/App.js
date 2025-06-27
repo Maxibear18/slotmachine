@@ -1,14 +1,28 @@
 import React, { useState } from 'react';
 import './App.css';
 
+
 const symbols = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
+const symbolValues = {
+  '🍒': 20,
+  '🍋': 10,
+  '🔔': 30,
+  '💎': 100,
+  '7️⃣': 200,
+};
 
 function getRandomSymbol() {
   return symbols[Math.floor(Math.random() * symbols.length)];
 }
 
+function generateSlotGrid() {
+  return Array.from({ length: 3 }, () =>
+    Array.from({ length: 3 }, () => getRandomSymbol())
+  );
+}
+
 function App() {
-  const [slots, setSlots] = useState(['❔', '❔', '❔']);
+  const [grid, setGrid] = useState(generateSlotGrid());
   const [chips, setChips] = useState(100);
   const [message, setMessage] = useState('');
   const [lastChange, setLastChange] = useState(0);
@@ -19,49 +33,81 @@ function App() {
       return;
     }
 
-    const newSlots = [getRandomSymbol(), getRandomSymbol(), getRandomSymbol()];
-    setSlots(newSlots);
+    const newGrid = generateSlotGrid();
+    setGrid(newGrid);
 
-    let newChips = chips - 10; // cost to spin
-    let change = 0;
-    let resultMessage = '';
+    let winnings = 0;
+    const winningLines = [];
 
-    const [s1, s2, s3] = newSlots;
-
-    if (s1 === s2 && s2 === s3) {
-      change = 100;
-      resultMessage = `🎉 JACKPOT! 3 of a kind! You win ${change} chips!`;
-    } else if (s1 === s2 || s2 === s3 || s1 === s3) {
-      change = 50;
-      resultMessage = `✨ Nice! 2 of a kind! You win ${change} chips!`;
-    } else {
-      resultMessage = '😢 No match. Better luck next time!';
+    for (let i = 0; i < 3; i++) {
+      if (
+        newGrid[i][0] === newGrid[i][1] &&
+        newGrid[i][1] === newGrid[i][2]
+      ) {
+        winnings += symbolValues[newGrid[i][0]];
+        winningLines.push(`Row ${i + 1} (${newGrid[i][0]})`);
+      }
     }
 
-    newChips += change;
-    setChips(newChips);
-    setLastChange(change - 10); // spin cost = -10, win is +change
-    setMessage(resultMessage);
+    for (let j = 0; j < 3; j++) {
+      if (
+        newGrid[0][j] === newGrid[1][j] &&
+        newGrid[1][j] === newGrid[2][j]
+      ) {
+        winnings += symbolValues[newGrid[0][j]];
+        winningLines.push(`Column ${j + 1} (${newGrid[0][j]})`);
+      }
+    }
+
+    if (
+      newGrid[0][0] === newGrid[1][1] &&
+      newGrid[1][1] === newGrid[2][2]
+    ) {
+      winnings += symbolValues[newGrid[0][0]];
+      winningLines.push(`Diagonal ↘ (${newGrid[0][0]})`);
+    }
+
+    if (
+      newGrid[0][2] === newGrid[1][1] &&
+      newGrid[1][1] === newGrid[2][0]
+    ) {
+      winnings += symbolValues[newGrid[0][2]];
+      winningLines.push(`Diagonal ↙ (${newGrid[0][2]})`);
+    }
+
+    const chipChange = winnings - 10;
+    setChips(prev => prev + chipChange);
+    setLastChange(chipChange);
+
+    if (winningLines.length > 0) {
+      setMessage(`🎉 You won ${winnings} chips!\nWinning Lines:\n- ${winningLines.join('\n- ')}`);
+    } else {
+      setMessage('😢 No matches. Try again!');
+    }
   };
 
   return (
     <div className="App">
       <h1>🎰 Slot Machine</h1>
-
       <div className="chip-count">
         💰 Chips: <strong>{chips}</strong>
       </div>
 
-      <div className="slot-display">
-        {slots.map((symbol, index) => (
-          <span key={index} className="slot">{symbol}</span>
+      {/* Slot grid */}
+      <div className="slot-grid">
+        {grid.map((row, rowIndex) => (
+          <div key={rowIndex} className="slot-row">
+            {row.map((symbol, colIndex) => (
+              <span key={colIndex} className="slot">{symbol}</span>
+            ))}
+          </div>
         ))}
       </div>
 
       <button onClick={spin}>Spin (Cost: 10 chips)</button>
 
       <div className="message">
-        <p>{message}</p>
+        <pre>{message}</pre>
         {lastChange !== 0 && (
           <p className={lastChange >= 0 ? 'win' : 'loss'}>
             {lastChange >= 0 ? `+${lastChange}` : `${lastChange}`} chips this spin
