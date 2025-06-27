@@ -27,6 +27,7 @@ function App() {
   const [lastChange, setLastChange] = useState(0);
   const [matchedSlots, setMatchedSlots] = useState([]);
   const [isSpinning, setIsSpinning] = useState(false);
+  const [showLegend, setShowLegend] = useState(true);
 
   const spin = () => {
     if (chips < 10 || isSpinning) return;
@@ -111,16 +112,25 @@ function App() {
 
   return (
     <div className="App">
-      <div className="legend">
-        <h3>🎯 Symbol Values</h3>
-        <ul>
-          {symbols.map((sym) => (
-            <li key={sym}>
-              <span className="legend-symbol">{sym}</span> = {symbolValues[sym]} chips
-            </li>
-          ))}
-        </ul>
-      </div>
+      <button 
+        onClick={() => setShowLegend(prev => !prev)} 
+        className="legend-toggle"
+      >
+        {showLegend ? '❓ Hide Legend' : '❓ Show Legend'}
+      </button>
+
+      {showLegend && (
+        <div className="legend">
+          <h3>🎯 Symbol Values</h3>
+          <ul>
+            {symbols.map((sym) => (
+              <li key={sym}>
+                <span className="legend-symbol">{sym}</span> = {symbolValues[sym]} chips
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <h1>🎰 Slot Machine</h1>
 
