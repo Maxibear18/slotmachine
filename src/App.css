@@ -1,28 +1,86 @@
-.App {
-  text-align: center;
-  margin-top: 50px;
-  font-size: 24px;
+/* Global Reset and Background Fix */
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #121212;
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: white;
 }
 
+* {
+  box-sizing: border-box;
+}
+
+/* App Container */
+.App {
+  text-align: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Header */
+h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+/* Chip Count Display */
+.chip-count {
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.chip-count strong {
+  color: #ffd700;
+}
+
+/* Slot Symbol Display */
 .slot-display {
   font-size: 60px;
   margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
 }
 
 .slot {
-  margin: 0 10px;
+  transition: transform 0.2s;
 }
 
+/* Spin Button */
 button {
-  padding: 10px 20px;
+  padding: 12px 24px;
   font-size: 20px;
-  background: gold;
+  background: #ffd700;
+  color: black;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
+  margin-top: 20px;
+  transition: background 0.2s;
 }
 
 button:hover {
   background: orange;
+}
+
+/* Message Display */
+.message {
+  margin-top: 20px;
+  font-size: 20px;
+  text-align: center;
+}
+
+.win {
+  color: #00ff99;
+  font-weight: bold;
+}
+
+.loss {
+  color: #ff5555;
+  font-weight: bold;
 }
